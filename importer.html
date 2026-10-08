@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genomic AMR Prediction Tool for Escherichia coli</title>
+    <link rel="stylesheet" href="style2.css">
+</head>
+<body>
+    <nav class="navbar">
+  <div class="nav-container">
+    <a href="home.html" class="logo">Genomic AMR Predictor</a>
+    <ul class="nav-links">
+      <li><a href="home.html">Accueil</a></li>
+      <li><a href="about.html">À propos</a></li>
+      <li><a href="importer.html" class="active">Importer</a></li>
+      <li><a href="poser.html">Poser une question</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+    <!-- Header -->
+    <div class="header-container">
+        <div class="header-icon">🦠</div>
+        <div>
+            <h1 class="header-title">Genomic AMR Prediction Tool for Escherichia coli</h1>
+            <p class="header-subtitle">Outil de prédiction de la résistance antimicrobienne basé sur le machine learning</p>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h2 class="hero-title">🦠 Profilage de résistance antimicrobienne chez <span class="highlight">E. coli</span></h2>
+        <p class="hero-description">
+            Identifiez les profils de résistance de vos isolats face à 
+            <span class="highlight">12 antibiotiques</span> cliniquement pertinents
+            avec notre modèle prédictif <span class="highlight">Random Forest</span>.
+        </p>
+    </div>
+
+    <!-- Main Card Container -->
+    <div class="main-card">
+        
+        <!-- Step 1: Input Selection -->
+        <div class="step-header">
+            <div class="step-number">1</div>
+            <h3 class="step-title">Importez votre fichier génomique</h3>
+        </div>
+
+        <!-- Mode Switcher -->
+        <div class="mode-toggle">
+            <label class="toggle-option active" id="tab-csv">
+                <input type="radio" name="input_mode" value="csv" checked> 📊 Table de gènes (CSV/JSON)
+            </label>
+            <label class="toggle-option" id="tab-fasta">
+                <input type="radio" name="input_mode" value="fasta"> 🧬 Génome FASTA (Prokka)
+            </label>
+        </div>
+
+        <!-- CSV Section -->
+        <div id="section-csv" class="input-section">
+            <div class="info-box">
+                <strong>Format CSV attendu:</strong>
+                <pre>ÉCHANTILLON,geneA,geneB,geneC,geneD,...
+Ecoli_001,1,0,1,0,...</pre>
+                • Première colonne = NOM DE L'ÉCHANTILLON<br>
+                • Autres colonnes = NOMS DES GÈNES (0/1 présence/absence)
+            </div>
+            <input type="file" id="csv-file-input" accept=".csv">
+        </div>
+
+        <!-- FASTA Section -->
+        <div id="section-fasta" class="input-section hidden">
+            <div class="info-box">
+                <strong>Pipeline automatique (3 étapes) :</strong><br>
+                1. <strong>Prokka</strong> annote votre génome assemblé<br>
+                2. <strong>Extraction</strong> des ~17k gènes ML pertinents<br>
+                3. <strong>Génération</strong> de la matrice binaire 0/1 compatible ML
+            </div>
+            <input type="file" id="fasta-file-input" accept=".fasta,.fa,.fna">
+        </div>
+
+        <!-- Step 2: Action Button -->
+        <div class="step-header" style="margin-top: 2rem;">
+            <div class="step-number">2</div>
+            <h3 class="step-title">Lancez l'analyse</h3>
+        </div>
+        
+        <button id="btn-analyze" class="stButton">▶️ Lancer l'analyse des 12 antibiotiques</button>
+
+        <!-- Loader -->
+        <div id="loader" class="loader hidden">
+            <div class="spinner"></div>
+            <p id="loader-status">Traitement en cours, veuillez patienter...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-container" class="results-table hidden">
+            <div class="step-header">
+                <div class="step-number success-badge">✓</div>
+                <h3 class="step-title">Résultats de l'analyse</h3>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-label">📊 Échantillons</span>
+                    <span class="metric-value" id="m-samples">0</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">🧪 Tests totaux</span>
+                    <span class="metric-value" id="m-total">0</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">🔴 Résistants</span>
+                    <span class="metric-value" id="m-resistant">0</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">🟢 Sensibles</span>
+                    <span class="metric-value" id="m-sensible">0</span>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Échantillon</th>
+                        <th>Code</th>
+                        <th>Nom complet</th>
+                        <th>Probabilité (%)</th>
+                        <th>Verdict</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body"></tbody>
+            </table>
+
+            <button id="btn-download" class="stButton download-btn">📥 Télécharger résultats (CSV)</button>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p class="footer-text">
+            © 2026 🦠 <span style="color: #06b6d4; font-weight: 600;">AMR Predictor</span> — Outil de prédiction de résistance chez <i>E. coli</i> • <span style="color: #facc15; font-weight: 600;">⚠️ Résultats à valider par antibiogramme</span>
+        </p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
